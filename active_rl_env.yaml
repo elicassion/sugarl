@@ -1,0 +1,50 @@
+name: arl
+
+channels:
+    - defaults
+    - pytorch
+    - nvidia
+
+dependencies:
+    - python=3.9
+    - pip
+
+    # pytorch 
+    - pytorch==1.13.1 
+    - torchvision 
+    - torchaudio
+    - pytorch-cuda=11.6
+
+    - pip:
+        - requests
+        - joblib
+        - psutil
+        - h5py
+        - lxml
+        - colorama
+
+        - jupyter     # Used to show the notebook
+        - jupyterlab
+
+        - scipy
+        - matplotlib  # Used for vis
+        - tqdm
+
+        - mujoco
+        - mujoco-py>=2.1.2.14
+        - atari-py
+        - dm-control==1.0.11
+        - gymnasium
+
+        - numpy
+        - pandas
+        - einops
+        - opencv-python
+
+        - tensorboard
+        - tqdm
+
+        - pybullet
+        - ptflops # get model computation info
+
+        - git+https://github.com/elicassion/active-gym.git

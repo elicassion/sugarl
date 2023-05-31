@@ -1,0 +1,14 @@
+*/__pycache__
+*.pyc
+*.txt
+_doc
+runs
+runs/*
+logs
+logs/*
+recordings
+trained_models
+recordings/*
+trained_models/*
+*/.ipynb_checkpoints
+*.egg-info
