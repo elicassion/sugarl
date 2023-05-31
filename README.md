@@ -50,7 +50,7 @@ In the provided scripts, 26 Atari games are in parallel, with sequentially execu
 ### Notes
 **Naming**:
 
-All agents are under `agent/`, with the name format `<base_algorithm>_<env>_<variant>.py`. Each file is an individual entry for the whole process.
+All agents are under `agent/`, with the name format `<base_algorithm>_<env>_<variant>.py`. Each file is an individual entry for the whole process. We support DQN, SAC, and DrQ for base algorithms.
 
 All experiment scripts are under `scripts/`, with the format `<env>_<setting>.sh`
 Please ensure that the env and setting match the agent when launching jobs.
