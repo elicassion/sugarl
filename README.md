@@ -29,6 +29,10 @@ bash ./scripts/atari_series_5m.sh agent/<any_agent_valid_for_that_setting.py>
 bash ./scripts/atari_wp_series.sh agent/<any_agent_valid_for_that_setting.py>
 bash ./scripts/dmc_series.sh agent/<any_agent_valid_for_that_setting.py>
 ```
+For example, to run SUGARL-DQN on Atari
+```
+bash ./scripts/atari_series.sh agent/dqn_atari_sugarl.py
+```
 
 - Sanity checks: they run through the whole process with only a tiny amount of training to check bugs
 ```
