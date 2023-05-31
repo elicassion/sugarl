@@ -188,7 +188,7 @@ class ActiveActor(nn.Module):
         self.trunk = nn.Sequential(nn.Linear(repr_dim, feature_dim),
                                    nn.LayerNorm(feature_dim), nn.Tanh())
 
-        self.physical_policy = nn.Sequential(nn.Linear(feature_dim, hidden_dim),
+        self.motor_policy = nn.Sequential(nn.Linear(feature_dim, hidden_dim),
                                     nn.ReLU(inplace=True),
                                     nn.Linear(hidden_dim, hidden_dim),
                                     nn.ReLU(inplace=True),
@@ -205,16 +205,16 @@ class ActiveActor(nn.Module):
     def forward(self, obs, std):
         h = self.trunk(obs)
 
-        physical_mu = self.physical_policy(h)
-        physical_mu = torch.tanh(physical_mu)
-        physical_std = torch.ones_like(physical_mu) * std
-        physical_dist = TruncatedNormal(physical_mu, physical_std)
+        motor_mu = self.motor_policy(h)
+        motor_mu = torch.tanh(motor_mu)
+        motor_std = torch.ones_like(motor_mu) * std
+        motor_dist = TruncatedNormal(motor_mu, motor_std)
 
-        visual_mu = self.sensory_policy(h)
-        visual_mu = torch.tanh(visual_mu)
-        visual_std = torch.ones_like(visual_mu) * std
-        visual_dist = TruncatedNormal(visual_mu, visual_std)
-        return physical_dist, visual_dist
+        sensory_mu = self.sensory_policy(h)
+        sensory_mu = torch.tanh(sensory_mu)
+        sensory_std = torch.ones_like(sensory_mu) * std
+        sensory_dist = TruncatedNormal(sensory_mu, sensory_std)
+        return motor_dist, sensory_dist
 
 
 class ActiveCritic(nn.Module):
@@ -272,7 +272,7 @@ class DrQV2ActiveAgent:
         self.stddev_schedule = stddev_schedule
         self.stddev_clip = stddev_clip
 
-        self.sensory_action_step = sensory_action_step # for dicretize visual action
+        self.sensory_action_step = sensory_action_step # for dicretize sensory action
 
         # models
         self.encoder = Encoder(obs_shape).to(device)
@@ -318,21 +318,21 @@ class DrQV2ActiveAgent:
     def act(self, obs, step, eval_mode=None):
         obs = self.encoder(obs)
         stddev = schedule_drq(self.stddev_schedule, step)
-        physical_dist, visual_dist = self.actor(obs, stddev)
+        motor_dist, sensory_dist = self.actor(obs, stddev)
 
         # auto eval
         if eval_mode is None:
             eval_mode = not self.training
         
         if eval_mode:
-            motor_action = physical_dist.mean
-            sensory_action = visual_dist.mean
+            motor_action = motor_dist.mean
+            sensory_action = sensory_dist.mean
         else:
-            motor_action = physical_dist.sample(clip=None)
+            motor_action = motor_dist.sample(clip=None)
             if step < self.learning_starts:
                 motor_action.uniform_(-1.0, 1.0)
             
-            sensory_action = visual_dist.sample(clip=None)
+            sensory_action = sensory_dist.sample(clip=None)
             if step < self.learning_starts:
                 sensory_action.uniform_(-1.0, 1.0)
             
@@ -350,9 +350,9 @@ class DrQV2ActiveAgent:
 
         with torch.no_grad():
             stddev = schedule_drq(self.stddev_schedule, step)
-            physical_dist, visual_dist = self.actor(next_obs, stddev)
-            next_motor_action = physical_dist.sample(clip=self.stddev_clip)
-            next_sensory_action = visual_dist.sample(clip=self.stddev_clip)
+            motor_dist, sensory_dist = self.actor(next_obs, stddev)
+            next_motor_action = motor_dist.sample(clip=self.stddev_clip)
+            next_sensory_action = sensory_dist.sample(clip=self.stddev_clip)
             motor_target_Q1, motor_target_Q2, sensory_target_Q1, sensory_target_Q2 = self.critic_target(next_obs, 
                                                                                                             next_motor_action,
                                                                                                             next_sensory_action)
@@ -362,12 +362,12 @@ class DrQV2ActiveAgent:
             sensory_target_Q = reward + (discount * sensory_target_V)
 
         motor_q1, motor_q2, sensory_q1, sensory_q2 = self.critic(obs, motor_action, sensory_action)
-        physical_critic_loss = F.mse_loss(motor_q1, motor_target_Q) + \
+        motor_critic_loss = F.mse_loss(motor_q1, motor_target_Q) + \
                         F.mse_loss(motor_q2, motor_target_Q)
-        visual_critic_loss = F.mse_loss(sensory_q1, sensory_target_Q) + \
+        sensory_critic_loss = F.mse_loss(sensory_q1, sensory_target_Q) + \
                         F.mse_loss(sensory_q2, sensory_target_Q)
         
-        critic_loss = physical_critic_loss + visual_critic_loss
+        critic_loss = motor_critic_loss + sensory_critic_loss
 
         # optimize encoder and critic
         self.encoder_opt.zero_grad(set_to_none=True)
@@ -382,11 +382,11 @@ class DrQV2ActiveAgent:
         metrics = dict()
 
         stddev = schedule_drq(self.stddev_schedule, step)
-        physical_dist, visual_dist = self.actor(obs, stddev)
-        motor_action = physical_dist.sample(clip=self.stddev_clip)
-        motor_log_prob = physical_dist.log_prob(motor_action).sum(-1, keepdim=True)
-        sensory_action = visual_dist.sample(clip=self.stddev_clip)
-        visual_log_prob = visual_dist.log_prob(sensory_action).sum(-1, keepdim=True)
+        motor_dist, sensory_dist = self.actor(obs, stddev)
+        motor_action = motor_dist.sample(clip=self.stddev_clip)
+        motor_log_prob = motor_dist.log_prob(motor_action).sum(-1, keepdim=True)
+        sensory_action = sensory_dist.sample(clip=self.stddev_clip)
+        sensory_log_prob = sensory_dist.log_prob(sensory_action).sum(-1, keepdim=True)
         motor_q1, motor_q2, sensory_q1, sensory_q2 = self.critic(obs, motor_action, sensory_action)
         motor_q = torch.min(motor_q1, motor_q2)
         sensory_q = torch.min(sensory_q1, sensory_q2)

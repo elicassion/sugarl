@@ -93,7 +93,7 @@ def parse_args():
         help="automatic tuning of the entropy coefficient")
     parser.add_argument("--sensory-alpha-autotune", type=lambda x:bool(strtobool(x)), default=False, nargs="?", const=True,
         help="automatic tuning of the entropy coefficient")
-    parser.add_argument("--physical-target-entropy-scale", type=float, default=0.2,
+    parser.add_argument("--motor-target-entropy-scale", type=float, default=0.2,
         help="coefficient for scaling the autotune entropy target")
     parser.add_argument("--sensory-target-entropy-scale", type=float, default=0.2,
         help="coefficient for scaling the autotune entropy target")

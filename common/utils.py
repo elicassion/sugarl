@@ -197,7 +197,7 @@ def get_action_dim(action_space: spaces.Space) -> int:
         # Number of binary actions
         return int(action_space.n)
     elif isinstance(action_space, spaces.Dict):
-        return get_action_dim(action_space["physical_action"])
+        return get_action_dim(action_space["motor_action"])
     else:
         raise NotImplementedError(f"{action_space} action space is not supported")
 

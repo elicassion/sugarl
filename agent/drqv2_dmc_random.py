@@ -242,7 +242,7 @@ class DrQV2Agent:
         self.stddev_schedule = stddev_schedule
         self.stddev_clip = stddev_clip
 
-        self.sensory_action_step = sensory_action_step # for dicretize visual action
+        self.sensory_action_step = sensory_action_step # for dicretize sensory action
 
         # models
         self.encoder = Encoder(obs_shape).to(device)
