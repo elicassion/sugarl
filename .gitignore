@@ -1,7 +1,6 @@
 */__pycache__
 *.pyc
 *.txt
-_doc
 runs
 runs/*
 logs
