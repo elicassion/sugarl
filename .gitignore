@@ -6,8 +6,8 @@ runs/*
 logs
 logs/*
 recordings
-trained_models
 recordings/*
+trained_models
 trained_models/*
 */.ipynb_checkpoints
 *.egg-info

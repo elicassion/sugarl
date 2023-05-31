@@ -49,12 +49,13 @@ All experiment scripts automatically scale all tasks to your GPUs. Please modify
 - you are sharing GPU with others
 - either VRAM or RAM is not sufficient for scaling all jobs
 
-**Resource requirement reference**:
+**Resource requirement reference (SUGARL)**:
 
 - Atari:
-for each game with `100k` replay buffer: `~18G` RAM, `<3G` VRAM
+for each game with `100k` replay buffer: `~18G` RAM, `<2G` VRAM
+
 - DMC:
-for each task with `100k` replay buffer: `~20G` RAM, `3G` VRAM
+for each task with `100k` replay buffer: `~18G` RAM, `<3G` VRAM
 
 **Coding style**:
 

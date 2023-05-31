@@ -300,7 +300,7 @@ if __name__ == "__main__":
     # envs = gym.vector.AsyncVectorEnv(envs)
     envs = gym.vector.SyncVectorEnv(envs)
 
-    sugarl_r_scale = get_sugarl_reward_scale_atari()
+    sugarl_r_scale = get_sugarl_reward_scale_atari(args.env)
     
     resize = Resize((84, 84))
 
