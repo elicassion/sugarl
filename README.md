@@ -37,6 +37,12 @@ bash ./scripts/atari_test.sh agent/<any_agent_valid_for_your_test.py>
 bash ./scripts/dmc_test.sh agent/<any_agent_valid_for_your_test.py>
 ```
 
+All experiment scripts automatically scale all tasks to your GPUs. Please modify the gpu behavior (`CUDA_VISIBLE_DEVICES=<x>`) in the script if
+- you want to run jobs on certain GPUs
+- either VRAM or RAM is not sufficient for scaling all jobs
+
+In the provided scripts, 26 Atari games are in parallel, with sequentially executing each seed, 6 DMC environments x 5 seeds are all in parallel. Please do check the available RAM and VRAM on your machine before starting.
+
 ### Notes
 **Naming**:
 
@@ -44,10 +50,6 @@ All agents are under `agent/`, with the name format `<base_algorithm>_<env>_<var
 
 All experiment scripts are under `scripts/`, with the format `<env>_<setting>.sh`
 Please ensure that the env and setting match the agent when launching jobs.
-
-All experiment scripts automatically scale all tasks to your GPUs. Please modify the gpu behavior (`CUDA_VISIBLE_DEVICES=<x>`) in the script if
-- you are sharing GPU with others
-- either VRAM or RAM is not sufficient for scaling all jobs
 
 **Resource requirement reference (SUGARL)**:
 
