@@ -3,7 +3,7 @@ Code for paper **Active Reinforcement Learning with Limited Visual Observability
 We propose Sensorimotor Understanding Guided Active Reinforcement Learning (SUGARL) to solve Active-RL tasks.
 We also introduce [Active-Gym](https://github.com/elicassion/active-gym), a convenient library that modifies existing RL environments for Active-RL , with Gymnasium-like interface.
 
-[[Paper (soon)]]() [[Project Page]](https://elicassion.github.io/sugarl/sugarl.html) [[Active-Gym]](https://github.com/elicassion/active-gym)
+[[Paper]](https://arxiv.org/abs/2306.00975) [[Project Page]](https://elicassion.github.io/sugarl/sugarl.html) [[Active-Gym]](https://github.com/elicassion/active-gym)
 
 <img width="100%" src="_doc/media/sugarl_formulation.png">
 
@@ -69,6 +69,16 @@ We follow the coding style of [clean-rl](https://github.com/vwxyzjn/cleanrl) so 
 
 ## Citation
 Please consider cite us if you find this repo helpful.
+```
+@misc{shang2023active,
+    title={Active Reinforcement Learning under Limited Visual Observability},
+    author={Jinghuan Shang and Michael S. Ryoo},
+    year={2023},
+    eprint={2306.00975},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG}
+}
+```
 
 ## Acknowledgement
 We thank the implementation of [clean-rl](https://github.com/vwxyzjn/cleanrl).
