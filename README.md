@@ -45,7 +45,7 @@ All experiment scripts automatically scale all tasks to your GPUs. Please modify
 - you want to run jobs on certain GPUs
 - either VRAM or RAM is not sufficient for scaling all jobs
 
-In the provided scripts, 26 Atari games are in parallel, with sequentially executing each seed, 6 DMC environments x 5 seeds are all in parallel. Please do check the available RAM and VRAM on your machine before starting.
+In the provided scripts, 26 Atari games are in parallel, with sequentially executing each seed. 6 DMC environments x 5 seeds are all in parallel. Please do check the available RAM and VRAM on your machine before starting.
 
 ### Notes
 **Naming**:
