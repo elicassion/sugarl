@@ -2,7 +2,7 @@
 Borrow from stable-baselines3
 Due to dependencies incompability, we cherry-pick codes here
 """
-
+import copy
 import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generator, List, Optional, Union, NamedTuple
@@ -261,6 +261,7 @@ class ReplayBuffer(BaseBuffer):
         # see https://github.com/DLR-RM/stable-baselines3/issues/284
         self.handle_timeout_termination = handle_timeout_termination
         self.timeouts = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
+        self.infos = [None]*self.buffer_size
 
         if psutil is not None:
             total_memory_usage = self.observations.nbytes + self.actions.nbytes + self.rewards.nbytes + self.dones.nbytes
@@ -284,7 +285,7 @@ class ReplayBuffer(BaseBuffer):
         action: np.ndarray,
         reward: np.ndarray,
         done: np.ndarray,
-        infos: List[Dict[str, Any]],
+        infos: Dict[str, Any],
     ) -> None:
 
         # Reshape needed when using multiple envs with discrete observations
@@ -307,9 +308,10 @@ class ReplayBuffer(BaseBuffer):
         self.actions[self.pos] = np.array(action).copy()
         self.rewards[self.pos] = np.array(reward).copy()
         self.dones[self.pos] = np.array(done).copy()
+        self.infos[self.pos] = copy.deepcopy(infos)
 
         if self.handle_timeout_termination:
-            self.timeouts[self.pos] = np.array([info.get("TimeLimit.truncated", False) for info in infos])
+            self.timeouts[self.pos] = np.array([False])
 
         self.pos += 1
         if self.pos == self.buffer_size:
@@ -634,7 +636,7 @@ class DictReplayBuffer(ReplayBuffer):
         self.dones[self.pos] = np.array(done).copy()
 
         if self.handle_timeout_termination:
-            self.timeouts[self.pos] = np.array([info.get("TimeLimit.truncated", False) for info in infos])
+            self.timeouts[self.pos] = np.array([False for info in infos])
 
         self.pos += 1
         if self.pos == self.buffer_size:
@@ -887,6 +889,8 @@ class DoubleActionReplayBuffer(BaseBuffer):
 
         self.rewards = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.dones = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
+        self.infos = [None] * self.buffer_size
+
         # Handle timeouts termination properly if needed
         # see https://github.com/DLR-RM/stable-baselines3/issues/284
         self.handle_timeout_termination = handle_timeout_termination
@@ -915,7 +919,7 @@ class DoubleActionReplayBuffer(BaseBuffer):
         sensory_action: np.ndarray,
         reward: np.ndarray,
         done: np.ndarray,
-        infos: List[Dict[str, Any]],
+        infos: Dict[str, Any],
     ) -> None:
 
         # Reshape needed when using multiple envs with discrete observations
@@ -940,9 +944,10 @@ class DoubleActionReplayBuffer(BaseBuffer):
         self.sensory_actions[self.pos] = np.array(sensory_action).copy()
         self.rewards[self.pos] = np.array(reward).copy()
         self.dones[self.pos] = np.array(done).copy()
+        self.infos[self.pos] = copy.deepcopy(infos)
 
         if self.handle_timeout_termination:
-            self.timeouts[self.pos] = np.array([info.get("TimeLimit.truncated", False) for info in infos])
+            self.timeouts[self.pos] = np.array([False])
 
         self.pos += 1
         if self.pos == self.buffer_size:
@@ -1056,7 +1061,7 @@ class DoubleActionWithFovlocReplayBuffer(BaseBuffer):
         self.optimize_memory_usage = optimize_memory_usage
 
         self.observations = np.zeros((self.buffer_size, self.n_envs) + self.obs_shape, dtype=observation_space.dtype)
-        self.fov_locs = np.zeros((self.buffer_size, self.n_envs) + self.fov_loc_size, dtype=np.int64)
+        self.fov_locs = np.zeros((self.buffer_size, self.n_envs) + self.fov_loc_size, dtype=np.float32)
         
 
         if optimize_memory_usage:
@@ -1065,13 +1070,14 @@ class DoubleActionWithFovlocReplayBuffer(BaseBuffer):
             self.next_fov_locs = None
         else:
             self.next_observations = np.zeros((self.buffer_size, self.n_envs) + self.obs_shape, dtype=observation_space.dtype)
-            self.next_fov_locs = np.zeros((self.buffer_size, self.n_envs) + (self.fov_loc_size,), dtype=np.int64)
+            self.next_fov_locs = np.zeros((self.buffer_size, self.n_envs) + self.fov_loc_size, dtype=np.float32)
 
         self.motor_actions = np.zeros((self.buffer_size, self.n_envs, self.motor_action_dim), dtype=motor_action_space.dtype)
         self.sensory_actions = np.zeros((self.buffer_size, self.n_envs, self.sensory_action_dim), dtype=sensory_action_space.dtype)
 
         self.rewards = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.dones = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
+        self.infos = [None] * self.buffer_size
         # Handle timeouts termination properly if needed
         # see https://github.com/DLR-RM/stable-baselines3/issues/284
         self.handle_timeout_termination = handle_timeout_termination
@@ -1102,7 +1108,7 @@ class DoubleActionWithFovlocReplayBuffer(BaseBuffer):
         sensory_action: np.ndarray,
         reward: np.ndarray,
         done: np.ndarray,
-        infos: List[Dict[str, Any]],
+        infos: Dict[str, Any],
     ) -> None:
 
         # Reshape needed when using multiple envs with discrete observations
@@ -1110,6 +1116,8 @@ class DoubleActionWithFovlocReplayBuffer(BaseBuffer):
         if isinstance(self.observation_space, spaces.Discrete):
             obs = obs.reshape((self.n_envs,) + self.obs_shape)
             next_obs = next_obs.reshape((self.n_envs,) + self.obs_shape)
+            fov_locs = fov_locs.reshape((self.n_envs,) + self.fov_loc_size)
+            next_fov_locs = next_fov_locs.reshape((self.n_envs,) + self.fov_loc_size)
 
         # Same, for actions
         motor_action = motor_action.reshape((self.n_envs, self.motor_action_dim))
@@ -1131,9 +1139,10 @@ class DoubleActionWithFovlocReplayBuffer(BaseBuffer):
         self.sensory_actions[self.pos] = np.array(sensory_action).copy()
         self.rewards[self.pos] = np.array(reward).copy()
         self.dones[self.pos] = np.array(done).copy()
+        self.infos[self.pos] = copy.deepcopy(infos)
 
         if self.handle_timeout_termination:
-            self.timeouts[self.pos] = np.array([info.get("TimeLimit.truncated", False) for info in infos])
+            self.timeouts[self.pos] = np.array([False])
 
         self.pos += 1
         if self.pos == self.buffer_size:
@@ -1299,3 +1308,67 @@ class NstepRewardDoubleActionReplayBuffer(DoubleActionReplayBuffer):
         data = (*data[:5], reward, discount)
         
         return NstepRewardDoubleActionReplayBufferSamples(*tuple(map(self.to_torch, data)))
+    
+
+class NstepRewardDoubleActionWithFovlocReplayBufferSamples(NamedTuple):
+    observations: th.Tensor
+    fov_locs: th.Tensor
+    motor_actions: th.Tensor
+    sensory_actions: th.Tensor
+    next_observations: th.Tensor
+    next_fov_locs: th.Tensor
+    dones: th.Tensor
+    rewards: th.Tensor
+    discounts: th.Tensor
+
+
+class NstepRewardDoubleActionWithFovlocReplayBuffer(DoubleActionWithFovlocReplayBuffer):
+    def __init__(self, n_step_reward=3, gamma=0.99, **kwargs):
+        super().__init__(**kwargs)
+        self.n_step_reward = n_step_reward
+        self.gamma = gamma
+
+    def sample(self, batch_size: int, env: Optional[VectorEnv] = None) -> NstepRewardDoubleActionWithFovlocReplayBufferSamples:
+        if not self.optimize_memory_usage:
+            return super().sample(batch_size=batch_size, env=env)
+        # Do not sample the element with index `self.pos` as the transitions is invalid
+        # (we use only one array to store `obs` and `next_obs`)
+        if self.full:
+            batch_inds = (np.random.randint(1, self.buffer_size - self.n_step_reward, size=batch_size) + self.pos) % self.buffer_size
+        else:
+            batch_inds = np.random.randint(0, self.pos - self.n_step_reward, size=batch_size)
+        return self._get_samples(batch_inds, env=env)
+    
+    def _get_samples(self, batch_inds: np.ndarray, env: Optional[VectorEnv] = None) -> NstepRewardDoubleActionWithFovlocReplayBufferSamples:
+        # Sample randomly the env idx
+        env_indices = np.random.randint(0, high=self.n_envs, size=(len(batch_inds),))
+
+        if self.optimize_memory_usage:
+            next_obs = self._normalize_obs(self.observations[(batch_inds + 1) % self.buffer_size, env_indices, :], env)
+            next_fov_locs = self.fov_locs[(batch_inds + 1) % self.buffer_size, env_indices, :]
+        else:
+            next_obs = self._normalize_obs(self.next_observations[batch_inds, env_indices, :], env)
+            next_fov_locs = self.next_fov_locs[batch_inds, env_indices, :]
+
+        data = (
+            self._normalize_obs(self.observations[batch_inds, env_indices, :], env),
+            self.fov_locs[batch_inds, env_indices, :],
+            self.motor_actions[batch_inds, env_indices, :],
+            self.sensory_actions[batch_inds, env_indices, :],
+            next_obs,
+            next_fov_locs,
+            (self.dones[batch_inds, env_indices] * (1 - self.timeouts[batch_inds, env_indices])).reshape(-1, 1),
+            self._normalize_reward(self.rewards[batch_inds, env_indices].reshape(-1, 1), env),
+        )
+
+        reward = data[7]
+        discount = np.ones_like(data[7], dtype=np.float32)
+        for i in range(1, self.n_step_reward):
+            step_reward = self.rewards[(batch_inds+i) % self.buffer_size, env_indices].reshape(-1, 1)
+            discount *= np.array([0. if x else self.gamma for x in \
+                                  self.dones[(batch_inds+i) % self.buffer_size, env_indices].reshape(-1, 1)], dtype=np.float32).reshape(-1, 1)
+            reward += step_reward * discount
+
+        data = (*data[:7], reward, discount)
+        
+        return NstepRewardDoubleActionWithFovlocReplayBufferSamples(*tuple(map(self.to_torch, data)))

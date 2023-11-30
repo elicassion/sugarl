@@ -360,6 +360,15 @@ def schedule_drq(schdl, step):
                 return (1.0 - mix) * final1 + mix * final2
     raise NotImplementedError(schdl)
 
+def get_sugarl_reward_scale_robosuite(task_name) -> float:
+    if task_name == "Lift":
+        sugarl_reward_scale = 150/500
+    elif task_name == "ToolHang":
+        sugarl_reward_scale = 100/500
+    else:
+        sugarl_reward_scale = 100/500
+    return sugarl_reward_scale
+
 
 def get_sugarl_reward_scale_dmc(domain_name, task_name) -> float:
     if domain_name == "ball_in_cup" and task_name == "catch":
