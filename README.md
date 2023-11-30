@@ -1,8 +1,8 @@
 # SUGARL
-Code for NeurIPS 2023 paper **Active Reinforcement Learning with Limited Visual Observability**, by [Jinghuan Shang](https://www.cs.stonybrook.edu/~jishang) and [Michael S. Ryoo](http://michaelryoo.com/).
+Code for NeurIPS 2023 paper **Active Vision Reinforcement Learning with Limited Visual Observability**, by [Jinghuan Shang](https://www.cs.stonybrook.edu/~jishang) and [Michael S. Ryoo](http://michaelryoo.com/).
 
-We propose Sensorimotor Understanding Guided Active Reinforcement Learning (SUGARL) to solve Active-RL tasks.
-We also introduce [Active-Gym](https://github.com/elicassion/active-gym), a convenient library that modifies existing RL environments for Active-RL, with Gymnasium-like interface.
+We propose Sensorimotor Understanding Guided Active Reinforcement Learning (SUGARL) to solve ActiveVision-RL tasks.
+We also introduce [Active-Gym](https://github.com/elicassion/active-gym), a convenient library that modifies existing RL environments for ActiveVision-RL, with Gymnasium-like interface.
 
 [[Paper]](https://arxiv.org/abs/2306.00975) [[Project Page]](https://elicassion.github.io/sugarl/sugarl.html) [[Active-Gym]](https://github.com/elicassion/active-gym)
 
@@ -25,6 +25,7 @@ bash ./scripts/<any_setting.sh> agent/<any_agent_valid_for_that_setting.py>
 - Reproduce our experiments:
 ```
 cd sugarl       # make sure you are under the root dir of this repo
+bash ./scripts/robosuite_series.sh agent/<any_agent_valid_for_that_setting.py>
 bash ./scripts/atari_series.sh agent/<any_agent_valid_for_that_setting.py>
 bash ./scripts/atari_series_5m.sh agent/<any_agent_valid_for_that_setting.py>
 bash ./scripts/atari_wp_series.sh agent/<any_agent_valid_for_that_setting.py>
@@ -40,6 +41,7 @@ bash ./scripts/atari_series.sh agent/dqn_atari_sugarl.py
 cd sugarl       # make sure you are under the root dir of this repo
 bash ./scripts/atari_test.sh agent/<any_agent_valid_for_your_test.py>
 bash ./scripts/dmc_test.sh agent/<any_agent_valid_for_your_test.py>
+bash ./scripts/robosuite_test.sh agent/<any_agent_valid_for_your_test.py>
 ```
 
 All experiment scripts automatically scale all tasks to your GPUs. Please modify the gpu behavior (`CUDA_VISIBLE_DEVICES=<x>`) in the script if
@@ -63,6 +65,9 @@ for each game with `100k` replay buffer: `~18G` RAM, `<2G` VRAM
 
 - DMC:
 for each task with `100k` replay buffer: `~18G` RAM, `<3G` VRAM
+
+- Robosuite:
+for each task with `100k` replay buffer: `~54G` RAM, `4.2G` VRAM
 
 **Coding style**:
 
