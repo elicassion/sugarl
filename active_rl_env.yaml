@@ -36,7 +36,7 @@ dependencies:
         - dm-control==1.0.11
         - gymnasium>=0.28.1,<1.0.0
 
-        - numpy
+        - numpy<2.0.0
         - pandas
         - einops
         - opencv-python
